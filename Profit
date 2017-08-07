@@ -1,0 +1,182 @@
+import requests, json
+# $(".item-title").each( function(x){ console.log( '"'+$( this ).text()+'": '+$( this ).parent().attr("href").split("/")[2]+',' ) })
+engineer_rare={
+    "Little Boy 6LB":61,
+    "Spitfire":4,
+    "AC43 Rapier":34,
+    "Repair Kit":370,
+    "Improved radiator":108,
+    "Weapon cooler":78,
+    "Ammo pack":68,
+    "Fuel tank":433,
+    "Scope":69,
+    "balloon tyre":390,
+    "baloon tyre st":388,
+}
+engineer_legendary={
+    "Porcupine ": 56,
+    "Firebug ": 341,
+    "Scorpion ": 49
+}
+
+lunatic_rare={
+    "AT Wasp": 44,
+    "Sledgehammer":2,
+    "Growl":60,
+    "Light engine":80,
+    "Buzzsaw": 73,
+    "Explosive spear":72,
+    "Rocket booster": 129,
+    "Studded wheels st": 59,
+    "Studded wheel": 104,
+    "Chained wheel st": 87,
+    "Chained wheel": 121,
+    "Light generator": 77,
+
+}
+lunatic_epic={
+    "Thunderbolt ": 1,
+    "Cricket 1M ": 38,
+    "Druzhba 2 ": 92,
+    "Lancelot ": 84,
+    "'Hermes' booster ": 143,
+    "Improved engine ": 131,
+    "Improved Cooler ": 66,
+    "Gas generator ": 48,
+    "Small track ": 62,
+}
+lunatic_legendary={
+    "Blueprint storage ": 387,
+    "Storage expansion ": 386,
+    "Hammerfall ": 3,
+    "Harvester ": 46,
+}
+
+nomad_rare={
+    "ST-M23 Defender ": 74,
+    "MM5-4 Vector ": 7,
+    "Wyvern ": 64,
+    "Engine ": 112,
+    "Radar-detector ": 142,
+    "Racing wheel ": 383,
+    "Racing wheel ST ": 379,
+    "Landing gear ST ": 389,
+    "Landing gear ": 395,
+    "Attack drone ": 94,
+    "Hazardous generator ": 52,
+    "Chameleon ": 100,
+}
+nomad_epic={
+    "Spectre-2 ": 40,
+    "AC72 Whirlwind ": 32,
+    "Missile drone ": 79,
+    "V8 Engine ": 71,
+    "Powerful radar-detector ": 122,
+    "Charged radiator ": 86,
+    "MG13 Equalizer ": 31,
+    "Chameleon Mk2 ": 82,
+    "Hardened track ": 63,
+}
+nomad_legendary={
+    "Retcher ": 55,
+    "Reaper ": 33,
+}
+
+scavenger_rare={
+    "Judge 76mm ": 70,
+    "Auger ": 51,
+    "Trucker ": 39,
+    "Improved radar ": 152,
+    "Powerful Engine ": 65,
+    "Twin wheel ST ": 83,
+    "Twin wheel ": 91,
+    "Large wheel ST ": 113,
+    "Large wheel ": 116,
+    "Turret Deployer ": 123,
+    "Heavy generator ": 41,
+}
+scavenger_epic={
+    "Executioner 88mm ": 45,
+    "ZS-34 Fat Man ": 8,
+    "Missile turret ": 124,
+    "Expanded ammo pack ": 75,
+    "GL-55 Impulse ": 30,
+    "Powerful engine Mk2 ": 117,
+    "Pyre ": 6,
+    "Powerful radar ": 136,
+    "Armored track ": 42,
+}
+scavenger_legendary={
+    "Hurricane ": 54,
+    "Mammoth ": 47,
+}
+steppenwolfs_rare={
+    "Jawbreaker ": 371,
+    "APC wheel ST ": 380,
+    "APC wheel ": 384,
+    "Sidekick drone ": 373,
+}
+steppenwolfs_epic={
+    "Caucasus ": 375,
+    "ML 200 ": 385,
+    "Clarinet TOW ": 374,
+    "Humpback ": 372,
+}
+steppenwolfs_legendary={
+    "Mandrake ": 391,
+
+}
+
+def fetch_price( item ):
+    id=str(item);
+    
+    headers= {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36"}
+    r = requests.get("https://crossoutdb.com/data/recipe/"+str(item), headers=headers)
+    
+    if( r.status_code != 200 ):
+        print( "Error fetching "+item);
+        return 1;
+    
+    j = r.json() 
+
+    sell_price = float( j['Item']['FormatSellPrice'] )
+    sell_price_adjusted = sell_price - (sell_price * .1)
+    cost = float( j['Recipe']['Recipe']['SumSellFormat'] )
+    profit = round(  sell_price_adjusted - cost, 2)
+    instant_profit=profit-5
+
+    return {"cost":cost,
+        "sell_price": sell_price,
+        "sell_price_adjusted": sell_price_adjusted,
+        "profit":profit,
+        "instant_profit":instant_profit
+    }
+
+def find_profits( item_list, list_name ):
+
+    print(list_name)
+    for item, id  in item_list.items():
+        price = fetch_price( id )
+        if( price['profit'] > 0 ):
+            #print( "    '", item, "'        cost:",price['cost'],"  profit:",price['profit'] );
+            print("    %22s    cost:%4.2f  profit:%4.2f profit_cost_ratio:%4.2f" % (item, price['cost'], price['profit'],  (price['profit']/price['cost']) ) )
+            
+
+find_profits(engineer_rare, "Engineer Rares")
+find_profits(engineer_legendary, "Engineer Legendarys")
+
+find_profits(lunatic_rare, "Lunatic Rares")
+find_profits(lunatic_epic, "Lunatic Epics")
+find_profits(lunatic_legendary, "Lunatic Legendarys")
+
+find_profits(nomad_rare, "Nomad Rares")
+find_profits(nomad_epic, "Nomad Epics")
+find_profits(nomad_legendary, "Nomad Legendarys")
+
+find_profits(scavenger_rare, "Scavenger Rares")
+find_profits(scavenger_epic, "Scavenger Epics")
+find_profits(scavenger_legendary, "Scavengers Legendarys")
+
+find_profits(steppenwolfs_rare, "Steppenwolfs Rares")
+find_profits(steppenwolfs_epic, "Steppenwolfs Epics")
+find_profits(steppenwolfs_legendary, "Steppenwolfs Legendarys")
