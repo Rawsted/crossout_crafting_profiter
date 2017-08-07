@@ -1,0 +1,58 @@
+import requests, json
+# $(".item-title").each( function(x){ console.log( '"'+$( this ).text()+'": '+$( this ).parent().attr("href").split("/")[2]+',' ) })
+engineer_rare={
+    "Little Boy 6LB":61,
+    "Spitfire":4,
+    "AC43 Rapier":34,
+    "Repair Kit":370,
+    "Improved radiator":108,
+    "Weapon cooler":78,
+    "Ammo pack":68,
+    "Fuel tank":433,
+    "Scope":69,
+    "balloon tyre":390,
+    "baloon tyre st":388,
+}
+engineer_legendary={
+    "Porcupine ": 56,
+    "Firebug ": 341,
+    "Scorpion ": 49
+}
+
+def fetch_price( item ):
+    id=str(item);
+    
+    headers= {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36"}
+    r = requests.get("https://crossoutdb.com/data/recipe/"+str(item), headers=headers)
+    
+    if( r.status_code != 200 ):
+        print( "Error fetching "+item);
+        return 1;
+    
+    j = r.json() 
+
+    sell_price = float( j['Item']['FormatSellPrice'] )
+    sell_price_adjusted = sell_price - (sell_price * .1)
+    cost = float( j['Recipe']['Recipe']['SumSellFormat'] )
+    profit = round(  sell_price_adjusted - cost, 2)
+    instant_profit=profit-5
+
+    return {"cost":cost,
+        "sell_price": sell_price,
+        "sell_price_adjusted": sell_price_adjusted,
+        "profit":profit,
+        "instant_profit":instant_profit
+    }
+
+def find_profits( item_list, list_name ):
+
+    print(list_name)
+    for item, id  in item_list.items():
+        price = fetch_price( id )
+        if( price['profit'] > 0 ):
+            #print( "    '", item, "'        cost:",price['cost'],"  profit:",price['profit'] );
+            print("    %22s    cost:%4.2f  profit:%4.2f profit_cost_ratio:%4.2f" % (item, price['cost'], price['profit'],  (price['profit']/price['cost']) ) )
+            
+
+find_profits(engineer_rare, "Engineer Rares")
+find_profits(engineer_legendary, "Engineer Legendarys")
