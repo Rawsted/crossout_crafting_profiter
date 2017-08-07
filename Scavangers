@@ -1,0 +1,67 @@
+import requests, json
+# $(".item-title").each( function(x){ console.log( '"'+$( this ).text()+'": '+$( this ).parent().attr("href").split("/")[2]+',' ) })
+scavenger_rare={
+    "Judge 76mm ": 70,
+    "Auger ": 51,
+    "Trucker ": 39,
+    "Improved radar ": 152,
+    "Powerful Engine ": 65,
+    "Twin wheel ST ": 83,
+    "Twin wheel ": 91,
+    "Large wheel ST ": 113,
+    "Large wheel ": 116,
+    "Turret Deployer ": 123,
+    "Heavy generator ": 41,
+}
+scavenger_epic={
+    "Executioner 88mm ": 45,
+    "ZS-34 Fat Man ": 8,
+    "Missile turret ": 124,
+    "Expanded ammo pack ": 75,
+    "GL-55 Impulse ": 30,
+    "Powerful engine Mk2 ": 117,
+    "Pyre ": 6,
+    "Powerful radar ": 136,
+    "Armored track ": 42,
+}
+scavenger_legendary={
+    "Hurricane ": 54,
+    "Mammoth ": 47,
+}
+def fetch_price( item ):
+    id=str(item);
+    
+    headers= {"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36"}
+    r = requests.get("https://crossoutdb.com/data/recipe/"+str(item), headers=headers)
+    
+    if( r.status_code != 200 ):
+        print( "Error fetching "+item);
+        return 1;
+    
+    j = r.json() 
+
+    sell_price = float( j['Item']['FormatSellPrice'] )
+    sell_price_adjusted = sell_price - (sell_price * .1)
+    cost = float( j['Recipe']['Recipe']['SumSellFormat'] )
+    profit = round(  sell_price_adjusted - cost, 2)
+    instant_profit=profit-5
+
+    return {"cost":cost,
+        "sell_price": sell_price,
+        "sell_price_adjusted": sell_price_adjusted,
+        "profit":profit,
+        "instant_profit":instant_profit
+    }
+
+def find_profits( item_list, list_name ):
+
+    print(list_name)
+    for item, id  in item_list.items():
+        price = fetch_price( id )
+        if( price['profit'] > 0 ):
+            #print( "    '", item, "'        cost:",price['cost'],"  profit:",price['profit'] );
+            print("    %22s    cost:%4.2f  profit:%4.2f profit_cost_ratio:%4.2f" % (item, price['cost'], price['profit'],  (price['profit']/price['cost']) ) )
+            
+find_profits(scavenger_rare, "Scavenger Rares")
+find_profits(scavenger_epic, "Scavenger Epics")
+find_profits(scavenger_legendary, "Scavengers Legendarys")
